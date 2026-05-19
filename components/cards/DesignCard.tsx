@@ -2,6 +2,22 @@
 import Link from 'next/link';
 import { Star, Download } from 'lucide-react';
 
+interface DesignCardProps {
+  design: {
+    id: string;
+    title: string;
+    category: string;
+    price: number;
+    rating: number;
+    reviewCount: number;
+    downloads: number;
+    coverImage?: string;
+    designer: {
+      name: string;
+    };
+  };
+}
+
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('en-NG', {
     style: 'currency',
@@ -28,7 +44,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   'bim-cad': 'BIM / CAD',
 };
 
-export default function DesignCard({ design }) {
+export default function DesignCard({ design }: DesignCardProps) {
   return (
     <Link href={`/listing/${design.id}`} className="group block">
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
