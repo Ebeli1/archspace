@@ -2,10 +2,10 @@
 import { useState, useMemo } from 'react';
 import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight, Home } from 'lucide-react';
 import Link from 'next/link';
-import Navbar from '../../components/layout/Navbar';
-import Footer from '../../components/layout/Footer';
-import DesignCard from '../../components/cards/DesignCard';
-import { DESIGNS, CATEGORY_LABELS } from '../../lib/data';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import DesignCard from '@/components/cards/DesignCard';
+import { DESIGNS, CATEGORY_LABELS } from '@/lib/data';
 
 const SORT_OPTIONS = [
   { value: 'popular', label: 'Most popular' },
