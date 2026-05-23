@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Star, Download, Heart, Shield, Check, Clock, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Star, Download, Heart, Shield, Check, Clock, MessageCircle, ArrowLeft, Sparkles } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ChatModal from '@/components/chatmodal';
