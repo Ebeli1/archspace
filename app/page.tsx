@@ -1,11 +1,11 @@
 ﻿'use client';
 import Link from 'next/link'
-import { Search, ArrowRight, Star, Shield, Zap, Sparkles, TrendingUp, Award } from 'lucide-react'
+import { Search, ArrowRight, Star, Shield, Zap, Sparkles, TrendingUp, Award, RefreshCw } from 'lucide-react'
 import { useRole } from '@/context/RoleContext'
-import Navbar from '../components/layout/Navbar'
-import Footer from '../components/layout/Footer'
-import DesignCard from '../components/cards/DesignCard'
-import { DESIGNS, CATEGORY_LABELS } from '../lib/data'
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
+import DesignCard from '@/components/cards/DesignCard'
+import { DESIGNS, CATEGORY_LABELS } from '@/lib/data'
 
 export default function HomePage() {
   const { role } = useRole()
@@ -111,6 +111,32 @@ export default function HomePage() {
           </Link>
         </div>
       )}
+    </div>
+  </div>
+</section>
+
+{/* AI Features Banner */}
+<section className="bg-gradient-to-r from-brand-light to-brand border-y border-white/5">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="flex items-center gap-2 mb-5">
+      <Sparkles size={16} className="text-accent" />
+      <span className="text-white text-sm font-medium">New: AI-powered design features</span>
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {[
+        { href: '/ai/studio', icon: <Sparkles size={18} />, title: 'AI Design Studio', desc: 'Describe your dream space. Get a professional design brief through conversation.' },
+        { href: '/ai/remodel', icon: <RefreshCw size={18} />, title: 'Remodel Assistant', desc: 'Upload your existing floor plan. Get expert suggestions on what to change.' },
+        { href: '/ai/advisor', icon: <Search size={18} />, title: 'Design Advisor', desc: 'Tell me your needs. I\'ll find the best matching designs from our catalogue.' },
+      ].map(f => (
+        <Link key={f.href} href={f.href} className="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-accent/40 rounded-xl p-5 transition-all">
+          <div className="text-accent mb-3">{f.icon}</div>
+          <h3 className="text-white font-medium text-sm mb-1">{f.title}</h3>
+          <p className="text-white/50 text-xs leading-relaxed mb-3">{f.desc}</p>
+          <span className="text-accent text-xs flex items-center gap-1 group-hover:gap-2 transition-all">
+            Try it free <ArrowRight size={11} />
+          </span>
+        </Link>
+      ))}
     </div>
   </div>
 </section>

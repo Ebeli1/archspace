@@ -163,6 +163,19 @@ export default function ListingDetailPage() {
           </div>
         </div>
       </div>
+      {/* AI Remodel Suggestion */}
+<div className="mt-4 p-3 bg-accent/5 rounded-lg border border-accent/20">
+  <div className="flex items-center gap-2 mb-1">
+    <Sparkles size={14} className="text-accent" />
+    <span className="text-white font-medium text-sm">Want to modify this design?</span>
+  </div>
+  <p className="text-white/55 text-xs mb-2">
+    Use our AI Remodel Assistant to suggest changes, then request a revision from the designer.
+  </p>
+  <Link href="/ai/remodel" className="bg-accent hover:bg-accent-dark text-white text-xs font-medium px-4 py-1.5 rounded-lg transition-colors inline-block">
+    Try Remodel AI
+  </Link>
+</div>
 
       {/* Chat Modal */}
       <ChatModal
