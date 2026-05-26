@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useUser } from '@clerk/nextjs';
 
 type UserRole = 'buyer' | 'seller' | null;
 
@@ -14,21 +15,23 @@ const RoleContext = createContext<RoleContextType | undefined>(undefined);
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { isSignedIn, user } = useUser();
 
   useEffect(() => {
-    const savedRole = localStorage.getItem('userRole') as UserRole;
-    if (savedRole && (savedRole === 'buyer' || savedRole === 'seller')) {
-      setRole(savedRole);
+    if (isSignedIn && user) {
+      const userRole = user.publicMetadata?.role as UserRole;
+      if (userRole) {
+        setRole(userRole);
+      } else {
+        setRole(null);
+      }
+    } else {
+      setRole(null);
     }
     setIsLoading(false);
-  }, []);
+  }, [isSignedIn, user]);
 
   const handleSetRole = (newRole: UserRole) => {
-    if (newRole) {
-      localStorage.setItem('userRole', newRole);
-    } else {
-      localStorage.removeItem('userRole');
-    }
     setRole(newRole);
   };
 

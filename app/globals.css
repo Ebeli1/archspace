@@ -1,8 +1,102 @@
-﻿@tailwind base;
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background: #f8f7f4;
-  color: #1A1A2E;
+@layer base {
+  :root {
+    --brand: #1A1A2E;
+    --brand-light: #2D2D4E;
+    --accent: #C8A96E;
+    --accent-light: #F5EDD8;
+    --accent-dark: #8B6A2E;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #f8f7f4;
+    color: #1A1A2E;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 3s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulseSlow 4s ease-in-out infinite;
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #C8A96E 0%, #F5EDD8 50%, #C8A96E 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .glass-card-dark {
+    background: rgba(26, 26, 46, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200, 169, 110, 0.2);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes pulseSlow {
+  0%, 100% { transform: scale(1); opacity: 0.1; }
+  50% { transform: scale(1.05); opacity: 0.15; }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:bg-brand-light hover:shadow-lg hover:scale-105 active:scale-95;
+  }
+  
+  .btn-accent {
+    @apply bg-gradient-to-r from-accent to-accent-dark text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-accent/30 hover:scale-105 active:scale-95;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-gray-200 bg-white text-gray-700 font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:border-accent hover:text-accent hover:shadow-md hover:scale-105 active:scale-95;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent hover:shadow-md;
+  }
 }

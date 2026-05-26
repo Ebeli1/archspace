@@ -1,202 +1,119 @@
 'use client';
-import { useState } from 'react';
+import { SignIn, SignUp, useUser } from '@clerk/nextjs';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useRole } from '@/context/RoleContext';
-import { User, Store, Check, ArrowLeft } from 'lucide-react';
 
 export default function AuthPage() {
+  const [isSignUp, setIsSignUp] = useState(true);
+  const { isSignedIn, user } = useUser();
   const router = useRouter();
   const { setRole } = useRole();
-  const [selectedRole, setSelectedRole] = useState<'buyer' | 'seller' | null>(null);
-  const [isSignUp, setIsSignUp] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    
-    // Validation
-    if (isSignUp && !selectedRole) {
-      setError('Please select whether you want to buy or sell designs');
-      return;
+  useEffect(() => {
+    if (isSignedIn && user) {
+      const userRole = user.publicMetadata?.role as string;
+      if (userRole) {
+        setRole(userRole as 'buyer' | 'seller');
+        router.push('/');
+      }
     }
-    
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-    
-    if (isSignUp && !name) {
-      setError('Please enter your full name');
-      return;
-    }
-    
-    // Simulate successful sign up/sign in
-    if (selectedRole) {
-      setRole(selectedRole);
-    } else if (!isSignUp) {
-      // For sign in, default to buyer if no role selected
-      setRole('buyer');
-    }
-    
-    // Redirect to homepage
-    router.push('/');
+  }, [isSignedIn, user, router, setRole]);
+
+  const handleRoleSelection = (role: 'buyer' | 'seller') => {
+    fetch('/api/user/role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role }),
+    }).then(() => {
+      setRole(role);
+      router.push('/');
+    });
   };
 
+  // Show role selection after sign up
+  if (isSignedIn && !user?.publicMetadata?.role) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#1A1A2E] to-[#2D2D4E] flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+          <div className="text-center mb-6">
+            <div className="flex justify-center mb-3">
+              <Sparkles className="text-accent w-10 h-10" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">Welcome to ArchSpace!</h2>
+            <p className="text-gray-500 mt-1">How would you like to use the platform?</p>
+          </div>
+          <div className="space-y-3">
+            <button
+              onClick={() => handleRoleSelection('buyer')}
+              className="w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-accent hover:bg-accent/5 transition-all group"
+            >
+              <div className="font-semibold text-lg">🛍️ Buy Designs</div>
+              <p className="text-sm text-gray-500">Browse and purchase architectural designs from top creators</p>
+            </button>
+            <button
+              onClick={() => handleRoleSelection('seller')}
+              className="w-full p-4 border-2 border-gray-200 rounded-xl text-left hover:border-accent hover:bg-accent/5 transition-all group"
+            >
+              <div className="font-semibold text-lg">📈 Sell Designs</div>
+              <p className="text-sm text-gray-500">Upload your work and earn from your designs</p>
+            </button>
+          </div>
+          <Link href="/" className="mt-6 inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm">
+            <ArrowLeft size={14} /> Back to home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Show Clerk auth forms
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1A1A2E] to-[#2D2D4E]">
-      <div className="max-w-md mx-auto px-4 py-16">
-        {/* Back to Home button */}
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-8 transition-colors"
-        >
+      <div className="max-w-md mx-auto px-4 py-12">
+        <Link href="/" className="inline-flex items-center gap-2 text-white/60 hover:text-white mb-6 transition-colors">
           <ArrowLeft size={18} />
           Back to Home
         </Link>
 
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block">
-            <h1 className="text-3xl font-bold text-white">
-              Arch<span className="text-[#C8A96E]">Space</span>
-            </h1>
-          </Link>
-          <p className="text-white/60 mt-2">Nigeria's Design Marketplace</p>
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-3">
+            <Sparkles className="text-accent w-10 h-10" />
+          </div>
+          <h1 className="text-2xl font-bold text-white">
+            Arch<span className="text-accent">Space</span>
+          </h1>
+          <p className="text-white/50 text-sm mt-1">Nigeria's AI-Powered Design Marketplace</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="flex gap-2 mb-6">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="flex border-b border-gray-100">
             <button
-              type="button"
-              onClick={() => {
-                setIsSignUp(true);
-                setError('');
-              }}
-              className={`flex-1 py-2 rounded-lg font-semibold transition-colors ${
-                isSignUp ? 'bg-[#C8A96E] text-white' : 'bg-gray-100 text-gray-500'
+              onClick={() => setIsSignUp(true)}
+              className={`flex-1 py-3 text-center font-medium transition-all ${
+                isSignUp ? 'text-accent border-b-2 border-accent' : 'text-gray-400 hover:text-gray-600'
               }`}
             >
               Sign Up
             </button>
             <button
-              type="button"
-              onClick={() => {
-                setIsSignUp(false);
-                setError('');
-                setSelectedRole(null);
-              }}
-              className={`flex-1 py-2 rounded-lg font-semibold transition-colors ${
-                !isSignUp ? 'bg-[#C8A96E] text-white' : 'bg-gray-100 text-gray-500'
+              onClick={() => setIsSignUp(false)}
+              className={`flex-1 py-3 text-center font-medium transition-all ${
+                !isSignUp ? 'text-accent border-b-2 border-accent' : 'text-gray-400 hover:text-gray-600'
               }`}
             >
               Sign In
             </button>
           </div>
-
-          {/* Error message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {isSignUp && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A96E]"
-                  required={isSignUp}
-                />
-              </div>
+          <div className="p-6">
+            {isSignUp ? (
+              <SignUp routing="hash" redirectUrl="/auth" />
+            ) : (
+              <SignIn routing="hash" redirectUrl="/auth" />
             )}
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A96E]"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8A96E]"
-                required
-              />
-            </div>
-
-            {isSignUp && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">I want to</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedRole('buyer');
-                      setError('');
-                    }}
-                    className={`p-4 border-2 rounded-xl text-left transition-all ${
-                      selectedRole === 'buyer'
-                        ? 'border-[#C8A96E] bg-[#C8A96E]/5'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <User size={20} className={selectedRole === 'buyer' ? 'text-[#C8A96E]' : 'text-gray-400'} />
-                      {selectedRole === 'buyer' && <Check size={16} className="text-[#C8A96E]" />}
-                    </div>
-                    <p className="font-semibold mt-2">Buy Designs</p>
-                    <p className="text-xs text-gray-500 mt-1">Browse and purchase designs</p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedRole('seller');
-                      setError('');
-                    }}
-                    className={`p-4 border-2 rounded-xl text-left transition-all ${
-                      selectedRole === 'seller'
-                        ? 'border-[#C8A96E] bg-[#C8A96E]/5'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <Store size={20} className={selectedRole === 'seller' ? 'text-[#C8A96E]' : 'text-gray-400'} />
-                      {selectedRole === 'seller' && <Check size={16} className="text-[#C8A96E]" />}
-                    </div>
-                    <p className="font-semibold mt-2">Sell Designs</p>
-                    <p className="text-xs text-gray-500 mt-1">Earn from your work</p>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full py-3 bg-[#C8A96E] text-white font-semibold rounded-lg hover:bg-[#8B6A2E] transition-colors"
-            >
-              {isSignUp ? 'Create Account' : 'Sign In'}
-            </button>
-          </form>
-
-          <p className="text-center text-xs text-gray-400 mt-6">
-            By continuing, you agree to our Terms of Service and Privacy Policy
-          </p>
+          </div>
         </div>
       </div>
     </div>
