@@ -1,0 +1,6 @@
+echo ".next
+node_modules
+.git
+README.md
+.DS_Store
+*.log" > .vercelignore

@@ -2,11 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Star, Download, Heart, Shield, Check, Clock, MessageCircle, ArrowLeft, Sparkles } from 'lucide-react';
+import { Star, Download, Heart, Shield, Check, Clock, MessageCircle, ArrowLeft } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import ChatModal from '@/components/chatmodal';
-import { DESIGNS } from '@/lib/data';
+import { createClient } from '@/lib/supabase/client';
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('en-NG', {
@@ -21,13 +20,52 @@ export default function ListingDetailPage() {
   const designId = params.id as string;
   
   const [design, setDesign] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
-    const foundDesign = DESIGNS.find(d => d.id === designId);
-    setDesign(foundDesign);
+    async function fetchDesign() {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from('designs')
+        .select('*')
+        .eq('id', designId)
+        .single();
+      
+      if (!error && data) {
+        setDesign({
+          ...data,
+          coverImage: data.cover_image_url,
+          licenseType: data.license_type,
+          reviewCount: data.review_count,
+          designer: {
+            name: 'ArchSpace Designer',
+            initials: 'AD',
+            location: 'Nigeria',
+            totalDesigns: 5,
+            rating: 4.8
+          }
+        });
+      }
+      setLoading(false);
+    }
+    
+    if (designId) {
+      fetchDesign();
+    }
   }, [designId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!design) {
     return (
@@ -52,7 +90,6 @@ export default function ListingDetailPage() {
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back button */}
         <Link href="/browse" className="inline-flex items-center gap-2 text-gray-500 hover:text-accent mb-6 transition-colors">
           <ArrowLeft size={16} />
           Back to browse
@@ -60,7 +97,7 @@ export default function ListingDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Image */}
-          <div className="bg-white rounded-xl overflow-hidden border border-gray-200 sticky top-24">
+          <div className="bg-white rounded-xl overflow-hidden border border-gray-200">
             <img
               src={design.coverImage || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop'}
               alt={design.title}
@@ -105,29 +142,8 @@ export default function ListingDetailPage() {
               <p className="text-gray-600 leading-relaxed">{design.description}</p>
             </div>
 
-            {/* Designer with Chat Button */}
-            <div className="bg-gray-100 rounded-xl p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-brand rounded-full flex items-center justify-center text-white font-semibold">
-                  {design.designer?.initials || 'AD'}
-                </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">{design.designer?.name}</p>
-                  <p className="text-sm text-gray-500">{design.designer?.location || 'Nigeria'}</p>
-                  <p className="text-xs text-gray-400 mt-1">{design.designer?.totalDesigns || 0} designs</p>
-                </div>
-                <button 
-                  onClick={() => setIsChatOpen(true)}
-                  className="px-4 py-2 bg-accent text-white rounded-lg text-sm hover:bg-accent-dark transition-colors flex items-center gap-2"
-                >
-                  <MessageCircle size={16} />
-                  Chat with seller
-                </button>
-              </div>
-            </div>
-
             {/* Purchase Card */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm text-gray-500">Price</p>
@@ -163,28 +179,6 @@ export default function ListingDetailPage() {
           </div>
         </div>
       </div>
-      {/* AI Remodel Suggestion */}
-<div className="mt-4 p-3 bg-accent/5 rounded-lg border border-accent/20">
-  <div className="flex items-center gap-2 mb-1">
-    <Sparkles size={14} className="text-accent" />
-    <span className="text-white font-medium text-sm">Want to modify this design?</span>
-  </div>
-  <p className="text-white/55 text-xs mb-2">
-    Use our AI Remodel Assistant to suggest changes, then request a revision from the designer.
-  </p>
-  <Link href="/ai/remodel" className="bg-accent hover:bg-accent-dark text-white text-xs font-medium px-4 py-1.5 rounded-lg transition-colors inline-block">
-    Try Remodel AI
-  </Link>
-</div>
-
-      {/* Chat Modal */}
-      <ChatModal
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        sellerName={design.designer?.name || 'Designer'}
-        sellerInitials={design.designer?.initials || 'AD'}
-        designTitle={design.title}
-      />
 
       <Footer />
     </div>
