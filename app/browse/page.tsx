@@ -19,10 +19,16 @@ export default function BrowsePage() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('designs')
-        .select('*')
+        .select(`
+          *,
+          profiles!seller_id (
+            full_name,
+            location,
+            avatar_url,
+            bio
+          )
+        `)
         .eq('status', 'live');
-      
-      console.log('Supabase data:', data); // Debug: check what we get
       
       if (!error && data && data.length > 0) {
         // Transform data to match DesignCard expected format
@@ -40,16 +46,20 @@ export default function BrowsePage() {
           rating: d.rating,
           reviewCount: d.review_count,
           featured: d.featured,
-          designer: {
+          created_at: d.created_at,
+          designer: d.profiles ? {
+            name: d.profiles.full_name || 'Designer',
+            initials: (d.profiles.full_name || 'AD').charAt(0).toUpperCase(),
+            location: d.profiles.location || 'Nigeria',
+            avatar: d.profiles.avatar_url,
+            bio: d.profiles.bio
+          } : {
             name: 'ArchSpace Designer',
             initials: 'AD',
             location: 'Nigeria'
           }
         }));
-        console.log('Formatted designs:', formatted); // Debug: check formatted data
         setDesigns(formatted);
-      } else {
-        console.log('No data or error:', error);
       }
       setLoading(false);
     }
@@ -149,7 +159,6 @@ export default function BrowsePage() {
         ) : (
           <div className="text-center py-16">
             <p className="text-gray-500">No designs found</p>
-            <p className="text-xs text-gray-400 mt-2">Debug: Check browser console (F12)</p>
           </div>
         )}
       </div>
